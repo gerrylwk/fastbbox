@@ -32,24 +32,16 @@ jobs:
         CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
         # Skip 32-bit builds, PyPy, and musl builds for broader compatibility
         CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_* pp*"
-        # Use manylinux2014 for Ubuntu 18.04+ compatibility (glibc 2.17+)
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
         # Install build dependencies
-        CIBW_BEFORE_BUILD: pip install numpy cython
-        # Test command
-        CIBW_TEST_COMMAND: python -c "import fastbbox; import numpy as np; a = np.array([[0, 0, 10, 10]], dtype=np.float32); print('Test passed:', fastbbox.bbox_overlaps(a, a))"
-        # Linux specific - install compiler tools
-        CIBW_BEFORE_ALL_LINUX: >
-          yum install -y gcc-c++ ||
-          (apt-get update && apt-get install -y g++)
+        CIBW_BEFORE_BUILD: pip install numpy cython delvewheel
         # Windows specific - use delvewheel for better DLL handling
-        CIBW_BEFORE_BUILD_WINDOWS: pip install delvewheel
         CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: delvewheel repair -w {dest_dir} {wheel}
         # macOS specific - build for both Intel and Apple Silicon
         CIBW_ARCHS_MACOS: x86_64 arm64
         # Also build for ARM64 on Linux (for newer systems)
         CIBW_ARCHS_LINUX: x86_64 aarch64
+        # Test command
+        CIBW_TEST_COMMAND: python -c "import fastbbox; import numpy as np; a = np.array([[0, 0, 10, 10]], dtype=np.float32); print('Test passed:', fastbbox.bbox_overlaps(a, a))"
 
     - uses: actions/upload-artifact@v4
       with:
