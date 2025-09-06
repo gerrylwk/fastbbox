@@ -63,16 +63,17 @@ jobs:
         # Install build dependencies with version pinning for reproducibility
         CIBW_BEFORE_BUILD: pip install --upgrade pip setuptools wheel && pip install "numpy>=1.21.0" "cython>=3.0.0"
         # Enhanced test command with more comprehensive testing
-        CIBW_TEST_COMMAND: python -c "
+        CIBW_TEST_COMMAND: >
+          python -c "
           import fastbbox; import numpy as np; 
           print('Testing fastbbox import...'); 
           a = np.array([[0, 0, 10, 10], [5, 5, 15, 15]], dtype=np.float32); 
           b = np.array([[0, 0, 10, 10]], dtype=np.float32);
           iou = fastbbox.bbox_overlaps(a, b);
           giou = fastbbox.generalized_iou(a, b);
-          print(f'IoU test: {iou.shape} {iou[0,0]:.3f}');
-          print(f'GIoU test: {giou.shape} {giou[0,0]:.3f}');
-          print('✓ All tests passed!')
+          print('IoU test:', iou.shape, iou[0,0]);
+          print('GIoU test:', giou.shape, giou[0,0]);
+          print('All tests passed!')
           "
         # Linux specific - install latest compiler tools
         CIBW_BEFORE_ALL_LINUX: >

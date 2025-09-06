@@ -3,7 +3,7 @@
 
 import numpy as np
 cimport numpy as np
-from libc.math cimport atan2, sqrt, exp
+from libc.math cimport atan2, sqrt, exp   
 
 # Define type
 ctypedef np.float32_t DTYPE_t
