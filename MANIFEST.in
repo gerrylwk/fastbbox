@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include pyproject.toml
+recursive-include fastbbox *.pyx *.pxd *.pxi
+global-exclude *.pyc
+global-exclude *.so
+global-exclude *.c
+global-exclude *.cpp
+
