@@ -35,7 +35,7 @@ jobs:
         # Windows-specific: Disable wheel repair for now
         CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: ""
         # Simple test command
-        CIBW_TEST_COMMAND: python -c "import fastbbox; print('✓ Import successful')"
+        CIBW_TEST_COMMAND: python -c "import fastbbox; print('Import successful')"
 
     - uses: actions/upload-artifact@v4
       with:
