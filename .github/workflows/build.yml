@@ -21,17 +21,18 @@ jobs:
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.21.0
       env:
-        # Build for Python 3.9+ (including 3.14 which is now default)
-        CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-* cp314-*
-        # Skip 32-bit, PyPy, and musl builds
-        CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_* pp*"
-        # Use modern manylinux_2_28 (default in v3.1+)
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
-        # Install build dependencies
-        CIBW_BEFORE_BUILD: pip install numpy cython
-        # Simple test command
-        CIBW_TEST_COMMAND: python -c "import fastbbox; print('✓ Import successful')"
+          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
+          # Skip 32-bit, PyPy, and musl builds
+          CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_* pp*"
+          # Use modern manylinux_2_28 (default in v3.1+)
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
+          # Install build dependencies
+          CIBW_BEFORE_BUILD: pip install numpy cython
+          # Install compiler (fixed command)
+          CIBW_BEFORE_ALL_LINUX: yum install -y gcc-c++
+          # Simple test command
+          CIBW_TEST_COMMAND: python -c "import fastbbox; print('✓ Import successful')"
 
     - uses: actions/upload-artifact@v4
       with:
