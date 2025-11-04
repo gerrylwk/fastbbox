@@ -2,7 +2,7 @@
 # cython: boundscheck=False, wraparound=False, nonecheck=False, cdivision=True, initializedcheck=False
 
 """
-Oriented Bounding Box (OBB) IoU calculations using Cython - Final Version.
+Oriented Bounding Box (OBB) IoU calculations using Cython.
 
 This implementation uses a robust approach for OBB intersection calculation.
 OBB Format: [center_x, center_y, width, height, angle] where angle is in radians.
@@ -205,11 +205,10 @@ cdef inline DTYPE_t obb_area(OBB box):
     return box.width * box.height
 
 
-def bbox_overlaps_obb_final(np.ndarray[DTYPE_t, ndim=2] boxes,
+def bbox_overlaps_obb(np.ndarray[DTYPE_t, ndim=2] boxes,
                            np.ndarray[DTYPE_t, ndim=2] query_boxes):
     """
     Compute IoU overlaps between two sets of oriented bounding boxes.
-    Final robust implementation.
 
     Parameters
     ----------

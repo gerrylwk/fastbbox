@@ -16,7 +16,7 @@ from typing import List, Tuple
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from fastbbox.obb_bbox import bbox_overlaps_obb_final as bbox_overlaps_obb
+    from fastbbox.obb_bbox import bbox_overlaps_obb
     OBB_AVAILABLE = True
     print("SUCCESS: OBB functions imported successfully")
 except ImportError as e:
