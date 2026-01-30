@@ -1,3 +1,8 @@
+# CYTHON BUILD CONFIGURATION
+# This setup.py is for the stable Cython-based build of fastbbox.
+# For the nanobind build, use: pip install . -C--config-file=pyproject.nanobind.toml
+# See BUILD.md for more details.
+
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 import numpy

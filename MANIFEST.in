@@ -1,9 +1,13 @@
 include README.md
 include LICENSE
 include pyproject.toml
+include CMakeLists.txt
+include pyproject.nanobind.toml
 recursive-include fastbbox *.pyx *.pxd *.pxi
+recursive-include fastbbox *_nb.cpp
 global-exclude *.pyc
 global-exclude *.so
 global-exclude *.c
-global-exclude *.cpp
+# Exclude generated C++ from Cython, but keep *_nb.cpp for nanobind
+global-exclude bbox.cpp obb_bbox.cpp
 

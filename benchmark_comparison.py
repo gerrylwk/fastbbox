@@ -24,7 +24,9 @@ try:
         normalized_wasserstein_distance,
         bbox_overlaps_obb
     )
-    print("✓ Successfully imported fastbbox functions")
+    import fastbbox
+    backend = getattr(fastbbox, '__backend__', 'unknown')
+    print(f"✓ Successfully imported fastbbox functions (backend: {backend})")
 except ImportError as e:
     print(f"✗ Failed to import fastbbox: {e}")
     exit(1)

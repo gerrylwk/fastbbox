@@ -1,22 +1,50 @@
 # FastBBox
 
-Fast IoU/overlap computations for axis-aligned and oriented bounding boxes using Cython.
+Fast IoU/overlap computations for axis-aligned and oriented bounding boxes.
 
 ## Installation
 
-### From PyPI (recommended, not uploaded yet)
+FastBBox is available in two implementations with identical APIs:
+
+### Stable Release (Cython - Recommended)
 
 ```bash
 pip install fastbbox
 ```
 
-### From source
+- **Python support**: 3.8, 3.9, 3.10, 3.11, 3.12
+- **Status**: Mature, battle-tested implementation
+- **Use for**: Production environments
 
+### Experimental Release (nanobind)
+
+```bash
+pip install fastbbox-nanobind
+```
+
+- **Python support**: 3.9, 3.10, 3.11, 3.12
+- **Status**: Experimental, optimized for smaller binaries and faster imports
+- **Use for**: Testing, environments where binary size matters
+
+Both versions provide the same functionality and API. You can use them interchangeably.
+
+### From Source
+
+**Cython build**:
 ```bash
 git clone https://github.com/gerrylwk/fastbbox
 cd fastbbox
 pip install .
 ```
+
+**Nanobind build**:
+```bash
+git clone https://github.com/gerrylwk/fastbbox
+cd fastbbox
+pip install . -C--config-file=pyproject.nanobind.toml
+```
+
+See [BUILD.md](BUILD.md) for detailed build instructions.
 
 ## Usage
 

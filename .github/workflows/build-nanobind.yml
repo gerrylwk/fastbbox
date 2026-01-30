@@ -1,0 +1,90 @@
+name: Build Nanobind
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*-nb' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_wheels_nanobind:
+    name: Build nanobind wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build wheel
+
+    - name: Build wheels
+      uses: pypa/cibuildwheel@v2.21.0
+      env:
+        CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
+        # Skip 32-bit, PyPy, and musl builds
+        CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_* pp*"
+        # Use modern manylinux_2_28
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
+        # Install nanobind build dependencies
+        CIBW_BEFORE_BUILD: pip install nanobind scikit-build-core cmake ninja numpy
+        # Linux: Install C++ compiler and CMake
+        CIBW_BEFORE_ALL_LINUX: yum install -y gcc-c++ cmake ninja-build || apt-get update && apt-get install -y g++ cmake ninja-build
+        # Windows: Use delvewheel for repair
+        CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: pip install delvewheel && delvewheel repair -w {dest_dir} {wheel}
+        # Test that the nanobind backend is imported
+        CIBW_TEST_COMMAND: python -c "import fastbbox; print(f'Imported fastbbox with backend: {fastbbox.__backend__}'); from fastbbox import bbox_overlaps; import numpy as np; boxes = np.array([[0,0,10,10]], dtype=np.float32); result = bbox_overlaps(boxes, boxes); assert result[0,0] > 0.99, 'IoU test failed'"
+        # Build with nanobind config
+        CIBW_CONFIG_SETTINGS: --global-option=--config-file=pyproject.nanobind.toml
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: wheels-nanobind-${{ matrix.os }}
+        path: ./wheelhouse/*.whl
+
+  build_sdist_nanobind:
+    name: Build nanobind source distribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build sdist
+      run: pipx run build --sdist -C--config-file=pyproject.nanobind.toml
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: sdist-nanobind
+        path: dist/*.tar.gz
+
+  upload_pypi_nanobind:
+    needs: [build_wheels_nanobind, build_sdist_nanobind]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/fastbbox-nanobind
+    permissions:
+      id-token: write
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
