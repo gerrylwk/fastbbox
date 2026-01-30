@@ -4,49 +4,90 @@ Fast IoU/overlap computations for axis-aligned and oriented bounding boxes.
 
 ## Installation
 
-FastBBox is available in two implementations with identical APIs:
+FastBBox is available in two implementations with **identical APIs** - you can use either version with the same import statements and function calls.
 
-### Stable Release (Cython - Recommended)
+### Quick Install (Stable Cython Version - Recommended)
 
 ```bash
 pip install fastbbox
 ```
 
-- **Python support**: 3.8, 3.9, 3.10, 3.11, 3.12
-- **Status**: Mature, battle-tested implementation
-- **Use for**: Production environments
+| Feature | Details |
+|---------|---------|
+| **Python support** | 3.8, 3.9, 3.10, 3.11, 3.12 |
+| **Package name** | `fastbbox` |
+| **Backend** | Cython |
+| **Status** | Stable, production-ready |
+| **Binary size** | Standard |
+| **Best for** | Production environments, Python 3.8 support needed |
 
-### Experimental Release (nanobind)
+### Alternative (Experimental nanobind Version)
 
 ```bash
 pip install fastbbox-nanobind
 ```
 
-- **Python support**: 3.9, 3.10, 3.11, 3.12
-- **Status**: Experimental, optimized for smaller binaries and faster imports
-- **Use for**: Testing, environments where binary size matters
+| Feature | Details |
+|---------|---------|
+| **Python support** | 3.9, 3.10, 3.11, 3.12 |
+| **Package name** | `fastbbox-nanobind` |
+| **Backend** | nanobind |
+| **Status** | Experimental |
+| **Binary size** | Smaller (~30-40% reduction) |
+| **Best for** | Testing, size-constrained environments, newer Python versions |
 
-Both versions provide the same functionality and API. You can use them interchangeably.
+### Which Version Should I Use?
 
-### From Source
+- **Use Cython version** (`fastbbox`) if:
+  - You need Python 3.8 support
+  - You want the most stable, tested version
+  - You're deploying to production
 
-**Cython build**:
+- **Use nanobind version** (`fastbbox-nanobind`) if:
+  - You're using Python 3.9+
+  - You need smaller binary sizes (good for Docker images, Lambda functions)
+  - You want to test the latest binding technology
+  - You want potentially faster import times
+
+**Both versions have identical functionality and APIs!** The code examples work the same for both.
+
+### Building from Source
+
+**Cython version (stable)**:
 ```bash
 git clone https://github.com/gerrylwk/fastbbox
 cd fastbbox
 pip install .
 ```
 
-**Nanobind build**:
+**Nanobind version (experimental)**:
 ```bash
 git clone https://github.com/gerrylwk/fastbbox
 cd fastbbox
-pip install . -C--config-file=pyproject.nanobind.toml
+
+# Temporarily swap config files
+python -c "import shutil; shutil.move('pyproject.toml', 'pyproject.cython.toml.tmp'); shutil.move('pyproject.nanobind.toml', 'pyproject.toml')"
+pip install .
+
+# Restore original config
+python -c "import shutil; shutil.move('pyproject.toml', 'pyproject.nanobind.toml'); shutil.move('pyproject.cython.toml.tmp', 'pyproject.toml')"
 ```
 
-See [BUILD.md](BUILD.md) for detailed build instructions.
+**Note**: Building nanobind requires CMake 3.15+ installed on your system. See [BUILD.md](BUILD.md) for detailed instructions and troubleshooting.
+
+### Checking Your Backend
+
+Both versions install as `fastbbox` module. To check which backend you're using:
+
+```python
+import fastbbox
+print(f"Backend: {fastbbox.__backend__}")  # Output: 'cython' or 'nanobind'
+print(f"Version: {fastbbox.__version__}")
+```
 
 ## Usage
+
+**Note**: The following code works identically with both `fastbbox` (Cython) and `fastbbox-nanobind` (nanobind) versions. Simply install either package and use the same imports!
 
 ### Axis-Aligned Bounding Boxes
 
@@ -54,6 +95,10 @@ See [BUILD.md](BUILD.md) for detailed build instructions.
 import numpy as np
 from fastbbox import (bbox_overlaps, generalized_iou, distance_iou, 
                       complete_iou, efficient_iou, normalized_wasserstein_distance)
+
+# Check which backend you're using (optional)
+import fastbbox
+print(f"Using backend: {fastbbox.__backend__}")
 
 # Create some example bounding boxes [x1, y1, x2, y2]
 boxes = np.array([
@@ -168,7 +213,18 @@ For rotated/oriented bounding boxes in `[center_x, center_y, width, height, angl
 
 ## Performance
 
-This Cython implementation provides significant speedup over pure Python implementations, especially for large numbers of bounding boxes.
+Both Cython and nanobind implementations provide significant speedup over pure Python implementations, especially for large numbers of bounding boxes.
+
+### Performance Characteristics
+
+| Aspect | Cython Version | nanobind Version |
+|--------|---------------|------------------|
+| **Computation speed** | Fast (optimized C++) | Fast (optimized C++) |
+| **Import time** | Standard | Potentially faster |
+| **Binary size** | Larger | Smaller (30-40% reduction) |
+| **Memory usage** | Similar | Similar |
+
+Run `python benchmark_comparison.py` to benchmark on your system.
 
 ### When to Use Each Variant
 
@@ -231,20 +287,55 @@ For applications requiring exact rotated box IoU, consider implementing:
 
 ## Development
 
-### Building locally
+### Building Locally
 
+**Cython version**:
 ```bash
 pip install build
 python -m build
 ```
 
-### Testing the build
+**nanobind version**:
+```bash
+# Swap to nanobind config first (see "Building from Source" above)
+pip install build scikit-build-core cmake
+python -m build
+```
+
+### Testing Your Build
+
+After installing either version:
 
 ```bash
-pip install dist/fastbbox-0.1.0-*.whl
-python test_all_iou.py    # Run axis-aligned bounding box test suite
-python test_obb_iou.py    # Run oriented bounding box test suite
-python benchmark_comparison.py  # Run performance benchmarks
+# Check which backend is active
+python -c "import fastbbox; print(f'Backend: {fastbbox.__backend__}')"
+
+# Run test suites (works with both backends)
+python test_all_iou.py         # Axis-aligned bounding box tests
+python test_obb_iou.py         # Oriented bounding box tests
+python benchmark_comparison.py  # Performance benchmarks
+```
+
+### Comparing Both Versions
+
+To compare Cython vs nanobind performance:
+
+```bash
+# Test Cython
+pip install fastbbox
+# Rename pyproject.cython.toml -> pyproject.toml
+python -c "import fastbbox; print(f'Testing {fastbbox.__backend__}')"
+python benchmark_comparison.py > benchmark_cython.txt
+
+# Test nanobind
+pip uninstall -y fastbbox
+# Rename pyproject.nanobind.toml -> pyproject.toml
+pip install fastbbox-nanobind
+python -c "import fastbbox; print(f'Testing {fastbbox.__backend__}')"
+python benchmark_comparison.py > benchmark_nanobind.txt
+
+# Compare results
+# (Both should show similar computation speeds, but different import times and binary sizes)
 ```
 
 ## Requirements
