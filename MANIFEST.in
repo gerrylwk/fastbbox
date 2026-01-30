@@ -1,8 +1,10 @@
 include README.md
 include LICENSE
+include BUILD.md
 include pyproject.toml
-include CMakeLists.txt
+include pyproject.cython.toml
 include pyproject.nanobind.toml
+include CMakeLists.txt
 recursive-include fastbbox *.pyx *.pxd *.pxi
 recursive-include fastbbox *_nb.cpp
 global-exclude *.pyc

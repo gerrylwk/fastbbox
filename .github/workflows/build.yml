@@ -19,6 +19,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Use Cython pyproject.toml
+      run: |
+        cp pyproject.cython.toml pyproject.toml
+      shell: bash
+
     - name: Build Cython wheels
       uses: pypa/cibuildwheel@v2.21.0
       env:
@@ -48,6 +53,9 @@ jobs:
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
+
+    - name: Use Cython pyproject.toml
+      run: cp pyproject.cython.toml pyproject.toml
 
     - name: Build Cython sdist
       run: pipx run build --sdist

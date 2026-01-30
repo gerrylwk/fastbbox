@@ -53,6 +53,11 @@ pip install fastbbox-nanobind
 
 ### Building from Source
 
+The repository contains two separate config files:
+- `pyproject.cython.toml` - Cython build configuration
+- `pyproject.nanobind.toml` - nanobind build configuration
+- `pyproject.toml` - Default (symlinked to Cython by default)
+
 **Cython version (stable)**:
 ```bash
 git clone https://github.com/gerrylwk/fastbbox
@@ -65,12 +70,12 @@ pip install .
 git clone https://github.com/gerrylwk/fastbbox
 cd fastbbox
 
-# Temporarily swap config files
-python -c "import shutil; shutil.move('pyproject.toml', 'pyproject.cython.toml.tmp'); shutil.move('pyproject.nanobind.toml', 'pyproject.toml')"
+# Use nanobind config
+cp pyproject.nanobind.toml pyproject.toml
 pip install .
 
-# Restore original config
-python -c "import shutil; shutil.move('pyproject.toml', 'pyproject.nanobind.toml'); shutil.move('pyproject.cython.toml.tmp', 'pyproject.toml')"
+# Optional: restore Cython config as default
+cp pyproject.cython.toml pyproject.toml
 ```
 
 **Note**: Building nanobind requires CMake 3.15+ installed on your system. See [BUILD.md](BUILD.md) for detailed instructions and troubleshooting.
