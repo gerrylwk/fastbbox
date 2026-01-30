@@ -159,6 +159,8 @@ def quick_benchmark():
         
     except Exception as e:
         print(f"❌ Benchmark failed: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def main():
