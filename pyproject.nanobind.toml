@@ -57,7 +57,7 @@ build = "cp39-* cp310-* cp311-* cp312-*"
 skip = "*-win32 *-manylinux_i686 *-musllinux_* pp*"
 
 [tool.cibuildwheel.linux]
-before-all = "yum install -y gcc-c++ cmake ninja-build || apt-get update && apt-get install -y g++ cmake ninja-build"
+before-all = "yum install -y gcc-c++ cmake ninja-build || dnf install -y gcc-c++ cmake ninja-build"
 
 [tool.cibuildwheel.windows]
 before-build = "pip install delvewheel"
