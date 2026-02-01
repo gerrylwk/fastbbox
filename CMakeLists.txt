@@ -25,10 +25,10 @@ find_package(nanobind CONFIG REQUIRED)
 # Build bbox module
 # Use NOMINSIZE since our binding layer contains significant computational logic
 # that benefits from speed optimization rather than size optimization
-nanobind_add_module(bbox NOMINSIZE ${CMAKE_CURRENT_SOURCE_DIR}/bbox_nb.cpp)
+nanobind_add_module(bbox NOMINSIZE ${CMAKE_CURRENT_SOURCE_DIR}/fastbbox/bbox_nb.cpp)
 
 # Build obb_bbox module
-nanobind_add_module(obb_bbox NOMINSIZE ${CMAKE_CURRENT_SOURCE_DIR}/obb_bbox_nb.cpp)
+nanobind_add_module(obb_bbox NOMINSIZE ${CMAKE_CURRENT_SOURCE_DIR}/fastbbox/obb_bbox_nb.cpp)
 
 # Install the modules
 install(TARGETS bbox obb_bbox LIBRARY DESTINATION fastbbox)
