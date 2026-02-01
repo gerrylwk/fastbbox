@@ -21,10 +21,7 @@ jobs:
 
     - name: Use nanobind pyproject.toml
       run: |
-        python - <<'EOF'
-        import shutil
-        shutil.copy("pyproject.nanobind.toml", "pyproject.toml")
-        EOF
+        python -c "import shutil; shutil.copy('pyproject.nanobind.toml', 'pyproject.toml')"
 
     - name: Set up Python
       uses: actions/setup-python@v5
