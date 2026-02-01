@@ -229,7 +229,7 @@ Both Cython and nanobind implementations provide significant speedup over pure P
 | **Binary size** | Larger | Smaller (30-40% reduction) |
 | **Memory usage** | Similar | Similar |
 
-Run `python benchmark_comparison.py` to benchmark on your system.
+Run `python benchmark_fastbbox.py` to benchmark on your system.
 
 ### When to Use Each Variant
 
@@ -315,11 +315,31 @@ After installing either version:
 # Check which backend is active
 python -c "import fastbbox; print(f'Backend: {fastbbox.__backend__}')"
 
-# Run test suites (works with both backends)
-python test_all_iou.py         # Axis-aligned bounding box tests
-python test_obb_iou.py         # Oriented bounding box tests
-python benchmark_comparison.py  # Performance benchmarks
+# Run correctness tests (compares fastbbox against Python reference implementations)
+python test_fastbbox.py              # Summary output
+python test_fastbbox.py --verbose    # Detailed output with values
+python test_fastbbox.py -f iou giou  # Test specific functions
+
+# Run performance benchmarks (measures speedup vs Python)
+python benchmark_fastbbox.py              # Summary output  
+python benchmark_fastbbox.py --verbose    # Detailed timing per run
+python benchmark_fastbbox.py --size 1000  # Test with 1000 boxes
+python benchmark_fastbbox.py --runs 10    # Run 10 iterations for accuracy
 ```
+
+#### Test File Options
+
+**test_fastbbox.py** - Correctness validation:
+- `--verbose, -v`: Show detailed test output with expected/actual values
+- `--function, -f`: Test specific functions (iou, giou, diou, ciou, eiou, nwd, obb)
+- `--tolerance, -t`: Custom tolerance threshold (default: 1e-5)
+- `--size, -s`: Number of test boxes (default: 100)
+
+**benchmark_fastbbox.py** - Performance benchmarks:
+- `--verbose, -v`: Show individual run times and statistics
+- `--function, -f`: Benchmark specific functions
+- `--size, -s`: Number of boxes to test (default: 500)
+- `--runs, -r`: Number of benchmark iterations (default: 5)
 
 ### Comparing Both Versions
 
@@ -328,16 +348,14 @@ To compare Cython vs nanobind performance:
 ```bash
 # Test Cython
 pip install fastbbox
-# Rename pyproject.cython.toml -> pyproject.toml
 python -c "import fastbbox; print(f'Testing {fastbbox.__backend__}')"
-python benchmark_comparison.py > benchmark_cython.txt
+python benchmark_fastbbox.py > benchmark_cython.txt
 
 # Test nanobind
 pip uninstall -y fastbbox
-# Rename pyproject.nanobind.toml -> pyproject.toml
 pip install fastbbox-nanobind
 python -c "import fastbbox; print(f'Testing {fastbbox.__backend__}')"
-python benchmark_comparison.py > benchmark_nanobind.txt
+python benchmark_fastbbox.py > benchmark_nanobind.txt
 
 # Compare results
 # (Both should show similar computation speeds, but different import times and binary sizes)
