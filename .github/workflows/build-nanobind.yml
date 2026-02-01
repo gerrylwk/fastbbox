@@ -55,6 +55,8 @@ jobs:
           boxes = np.array([[0,0,10,10]], dtype=np.float32);
           result = bbox_overlaps(boxes, boxes);
           assert result[0,0] > 0.99, 'IoU test failed'"
+        # nanobind requires macos 10.13 or higher
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.13
 
     - uses: actions/upload-artifact@v4
       with:
