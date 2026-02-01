@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15...3.27)
-project(fastbbox_nanobind)
+project(fastbbox_nanobind LANGUAGES CXX)
 
 # Detect Python with Development.Module component
 if (CMAKE_VERSION VERSION_LESS 3.18)
@@ -25,10 +25,10 @@ find_package(nanobind CONFIG REQUIRED)
 # Build bbox module
 # Use NOMINSIZE since our binding layer contains significant computational logic
 # that benefits from speed optimization rather than size optimization
-nanobind_add_module(bbox NOMINSIZE fastbbox/bbox_nb.cpp)
+nanobind_add_module(bbox NOMINSIZE ${CMAKE_CURRENT_SOURCE_DIR}/fastbbox/bbox_nb.cpp)
 
 # Build obb_bbox module
-nanobind_add_module(obb_bbox NOMINSIZE fastbbox/obb_bbox_nb.cpp)
+nanobind_add_module(obb_bbox NOMINSIZE ${CMAKE_CURRENT_SOURCE_DIR}/fastbbox/obb_bbox_nb.cpp)
 
 # Install the modules
 install(TARGETS bbox obb_bbox LIBRARY DESTINATION fastbbox)
