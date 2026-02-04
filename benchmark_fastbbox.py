@@ -349,10 +349,10 @@ def main():
     parser.add_argument("--function", "-f", nargs="+",
                         choices=["iou", "giou", "diou", "ciou", "eiou", "nwd", "obb"],
                         help="Benchmark specific function(s)")
-    parser.add_argument("--size", "-s", type=int, default=500,
+    parser.add_argument("--size", "-s", type=int, default=10000,
                         help="Number of boxes to test (default: 500)")
-    parser.add_argument("--runs", "-r", type=int, default=5,
-                        help="Number of benchmark runs (default: 5)")
+    parser.add_argument("--runs", "-r", type=int, default=1,
+                        help="Number of benchmark runs (default: 1)")
     args = parser.parse_args()
     
     print("=" * 60)
@@ -371,15 +371,15 @@ def main():
         print(f"ERROR: Could not import fastbbox: {e}")
         return 1
     
-    print(f"Test size: {args.size} x {args.size // 2} boxes = {args.size * (args.size // 2):,} comparisons")
+    print(f"Test size: {args.size} x {args.size} boxes = {args.size * args.size:,} comparisons")
     print(f"Runs: {args.runs}")
     print("=" * 60)
     
     # Generate test data
     boxes = generate_boxes(args.size, seed=42)
-    query_boxes = generate_boxes(args.size // 2, seed=123)
+    query_boxes = generate_boxes(args.size, seed=123)
     obb_boxes = generate_obb_boxes(args.size, seed=42)
-    obb_query = generate_obb_boxes(args.size // 2, seed=123)
+    obb_query = generate_obb_boxes(args.size, seed=123)
     
     # Define benchmark functions
     benchmark_functions = {
@@ -419,7 +419,7 @@ def main():
     print("SUMMARY")
     print("=" * 60)
     print(f"Overall speedup: {overall_speedup:.1f}x faster than Python")
-    print(f"Total comparisons: {args.size * (args.size // 2):,}")
+    print(f"Total comparisons: {args.size * (args.size):,}")
     print(f"Functions benchmarked: {', '.join(r.name for r in results)}")
     
     return 0
