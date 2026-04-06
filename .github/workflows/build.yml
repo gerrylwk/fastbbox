@@ -1,4 +1,4 @@
-name: Build
+name: Build Cython (Stable)
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+  build_wheels_cython:
+    name: Build Cython wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
@@ -19,7 +19,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Build wheels
+    - name: Use Cython pyproject.toml
+      run: |
+        cp pyproject.cython.toml pyproject.toml
+      shell: bash
+
+    - name: Build Cython wheels
       uses: pypa/cibuildwheel@v2.21.0
       env:
         CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
@@ -42,14 +47,17 @@ jobs:
         name: wheels-${{ matrix.os }}
         path: ./wheelhouse/*.whl
 
-  build_sdist:
-    name: Build source distribution
+  build_sdist_cython:
+    name: Build Cython source distribution
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
 
-    - name: Build sdist
+    - name: Use Cython pyproject.toml
+      run: cp pyproject.cython.toml pyproject.toml
+
+    - name: Build Cython sdist
       run: pipx run build --sdist
 
     - uses: actions/upload-artifact@v4
@@ -57,8 +65,30 @@ jobs:
         name: sdist
         path: dist/*.tar.gz
 
-  upload_pypi:
-    needs: [build_wheels, build_sdist]
+  upload_testpypi_cython:
+    needs: [build_wheels_cython, build_sdist_cython]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/fastbbox
+    permissions:
+      id-token: write
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://upload.test.pypi.org/legacy/
+
+  upload_pypi_cython:
+    needs: [build_wheels_cython, build_sdist_cython]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
