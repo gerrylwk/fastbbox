@@ -19,7 +19,7 @@ pip install fastbbox
 | **Backend** | Cython |
 | **Status** | Stable, production-ready |
 | **Binary size** | Standard |
-| **Best for** | Production environments, Python 3.8 support needed |
+| **Best for** | Production environments |
 
 ### Alternative (Experimental nanobind Version)
 
@@ -47,7 +47,6 @@ pip install fastbbox-nanobind
   - You're using Python 3.9+
   - You need smaller binary sizes (good for Docker images, Lambda functions)
   - You want to test the latest binding technology
-  - You want potentially faster import times
 
 **Both versions have identical functionality and APIs!** The code examples work the same for both.
 

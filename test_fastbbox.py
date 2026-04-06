@@ -448,8 +448,10 @@ def main():
                         help="Test specific function(s)")
     parser.add_argument("--tolerance", "-t", type=float, default=1e-5,
                         help="Tolerance threshold for comparisons (default: 1e-5)")
+    parser.add_argument("--obb-tolerance", type=float, default=1e-3,
+                        help="Tolerance for OBB tests - looser since OBB is approximation-based (default: 1e-3)")
     parser.add_argument("--size", "-s", type=int, default=1000,
-                        help="Number of test boxes (default: 100)")
+                        help="Number of test boxes (default: 1000)")
     args = parser.parse_args()
     
     print("=" * 70)
@@ -468,7 +470,7 @@ def main():
         print(f"ERROR: Could not import fastbbox: {e}")
         return 1
     
-    print(f"Tolerance: {args.tolerance}")
+    print(f"Tolerance: {args.tolerance} (OBB: {args.obb_tolerance})")
     print(f"Test size: {args.size} boxes")
     print("=" * 70)
     
@@ -510,12 +512,12 @@ def main():
         total_tests += len(results)
         passed_tests += sum(1 for r in results if r.passed)
     
-    # Run OBB tests
+    # Run OBB tests (uses separate tolerance - OBB is approximation-based)
     if run_obb:
         print(f"\nOBB IoU Tests:")
         print("-" * 40)
         results = run_obb_tests(python_obb_iou, bbox_overlaps_obb, 
-                                obb_boxes, obb_query, args.tolerance, args.verbose)
+                                obb_boxes, obb_query, args.obb_tolerance, args.verbose)
         func_passed = print_results(results, args.verbose)
         all_passed = all_passed and func_passed
         total_tests += len(results)

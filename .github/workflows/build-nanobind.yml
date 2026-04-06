@@ -81,6 +81,28 @@ jobs:
         name: sdist-nanobind
         path: dist/*.tar.gz
 
+  upload_testpypi_nanobind:
+    needs: [build_wheels_nanobind, build_sdist_nanobind]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/fastbbox-nanobind
+    permissions:
+      id-token: write
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://upload.test.pypi.org/legacy/
+
   upload_pypi_nanobind:
     needs: [build_wheels_nanobind, build_sdist_nanobind]
     runs-on: ubuntu-latest
