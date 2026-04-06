@@ -83,9 +83,12 @@ jobs:
         merge-multiple: true
 
     - name: Publish to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://upload.test.pypi.org/legacy/
+      run: |
+        pip install twine
+        twine upload --repository-url https://upload.test.pypi.org/legacy/ dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
 
   upload_pypi_cython:
     needs: [build_wheels_cython, build_sdist_cython]
