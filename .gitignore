@@ -134,7 +134,7 @@ dmypy.json
 *.cpp
 *.html
 # Except nanobind C++ sources which are intentional committed sources
-!fastbbox/*_nb.cpp
+!src/fastbbox/*_nb.cpp
 
 # IDE files
 .vscode/

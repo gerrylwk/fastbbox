@@ -11,14 +11,14 @@ import numpy
 extensions = [
     Extension(
         "fastbbox.bbox",
-        ["fastbbox/bbox.pyx"],
+        ["src/fastbbox/bbox.pyx"],
         include_dirs=[numpy.get_include()],
         language="c++",
         extra_compile_args=["-O3"],
     ),
     Extension(
         "fastbbox.obb_bbox",
-        ["fastbbox/obb_bbox.pyx"],
+        ["src/fastbbox/obb_bbox.pyx"],
         include_dirs=[numpy.get_include()],
         language="c++",
         extra_compile_args=["-O3"],

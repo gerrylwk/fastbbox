@@ -39,6 +39,7 @@ Repository = "https://github.com/gerrylwk/fastbbox"
 Issues = "https://github.com/gerrylwk/fastbbox/issues"
 
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["fastbbox*"]
 
 [tool.cibuildwheel]

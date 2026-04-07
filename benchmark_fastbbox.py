@@ -349,7 +349,7 @@ def main():
     parser.add_argument("--function", "-f", nargs="+",
                         choices=["iou", "giou", "diou", "ciou", "eiou", "nwd", "obb"],
                         help="Benchmark specific function(s)")
-    parser.add_argument("--size", "-s", type=int, default=10000,
+    parser.add_argument("--size", "-s", type=int, default=1000,
                         help="Number of boxes to test (default: 500)")
     parser.add_argument("--runs", "-r", type=int, default=1,
                         help="Number of benchmark runs (default: 1)")

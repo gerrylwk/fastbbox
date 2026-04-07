@@ -47,8 +47,10 @@ dev = [
 cmake.source-dir = "."
 # Build directory
 build-dir = "build/{wheel_tag}"
-# Ensure the fastbbox package is included
-wheel.packages = ["fastbbox"]
+
+# Src layout: map import name -> source directory (dist name is fastbbox-nanobind)
+[tool.scikit-build.wheel.packages]
+fastbbox = "src/fastbbox"
 
 [tool.cibuildwheel]
 # Build for Python 3.9+
