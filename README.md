@@ -2,6 +2,21 @@
 
 Fast IoU/overlap computations for axis-aligned and oriented bounding boxes, powered by nanobind C++ extensions.
 
+## Benchmark
+```
+Function Python (ms)    FastBBox (ms)  Speedup
+--------------------------------------------------
+IoU           2037.59          4.29     474.9x
+GIoU          3712.32          7.98     465.2x
+DIoU          6751.35          8.97     752.3x
+CIoU         12025.54         36.65     328.1x
+EIoU          8753.35         10.56     829.3x
+NWD           4386.10         21.59     203.1x
+OBB          55237.81         60.39     914.7x
+--------------------------------------------------
+TOTAL        92904.06        150.43     617.6x
+```
+
 ## Installation
 
 ```bash
@@ -73,7 +88,7 @@ obb_iou = bbox_overlaps_obb(obb_boxes, obb_query_boxes)
 
 ### Axis-Aligned Bounding Box IoU Variants
 
-All variants accept boxes in `[x1, y1, x2, y2]` format:
+All variants accept boxes in `[x1, y1, x2, y2]` top-left-bottom-right format:
 
 - **Standard IoU**: Classic Intersection over Union
 - **Generalized IoU (GIoU)**: Considers enclosing area; values in `[-1, 1]`
