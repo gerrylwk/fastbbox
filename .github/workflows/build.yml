@@ -3,9 +3,12 @@ name: Build and Publish
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
+    tags:
+      - 'v*'        # release:  v1.2.3   → publish to PyPI
+      - 'v*-rc*'    # candidate: v1.2.3-rc1 → publish to TestPyPI
   pull_request:
     branches: [ main ]
+  workflow_dispatch:   # allow manual trigger from the Actions UI
 
 jobs:
   build_wheels:
@@ -17,7 +20,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -54,7 +57,7 @@ jobs:
         # nanobind requires macos 10.13 or higher
         CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.13
 
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v4
       with:
         name: wheels-${{ matrix.os }}
         path: ./wheelhouse/*.whl
@@ -64,12 +67,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v4
 
     - name: Build sdist
       run: pipx run build --sdist
 
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v4
       with:
         name: sdist
         path: dist/*.tar.gz
@@ -78,13 +81,14 @@ jobs:
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Only on release-candidate tags: v1.2.3-rc1, v1.2.3-rc2, etc.
+    if: github.event_name == 'push' && contains(github.ref, '-rc')
     environment:
       name: testpypi
       url: https://test.pypi.org/p/fastbbox
     steps:
     - name: Download all artifacts
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v4
       with:
         path: dist
         merge-multiple: true
@@ -109,7 +113,7 @@ jobs:
       id-token: write
     steps:
     - name: Download all artifacts
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v4
       with:
         path: dist
         merge-multiple: true
