@@ -129,12 +129,12 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Cython/nanobind generated files (exclude auto-generated C/C++)
+# Exclude auto-generated C/C++ files
 *.c
 *.cpp
 *.html
-# Except nanobind C++ sources which are intentional committed sources
-!fastbbox/*_nb.cpp
+# Track nanobind C++ sources (intentional committed sources, not generated)
+!src/fastbbox/*_nb.cpp
 
 # IDE files
 .vscode/

@@ -349,7 +349,7 @@ def main():
     parser.add_argument("--function", "-f", nargs="+",
                         choices=["iou", "giou", "diou", "ciou", "eiou", "nwd", "obb"],
                         help="Benchmark specific function(s)")
-    parser.add_argument("--size", "-s", type=int, default=10000,
+    parser.add_argument("--size", "-s", type=int, default=1000,
                         help="Number of boxes to test (default: 500)")
     parser.add_argument("--runs", "-r", type=int, default=1,
                         help="Number of benchmark runs (default: 1)")
@@ -364,9 +364,7 @@ def main():
         from fastbbox import (bbox_overlaps, generalized_iou, distance_iou,
                               complete_iou, efficient_iou, normalized_wasserstein_distance,
                               bbox_overlaps_obb)
-        import fastbbox
-        backend = getattr(fastbbox, '__backend__', 'unknown')
-        print(f"Backend: {backend}")
+        print(f"Backend: Nanobind")
     except ImportError as e:
         print(f"ERROR: Could not import fastbbox: {e}")
         return 1
