@@ -364,9 +364,7 @@ def main():
         from fastbbox import (bbox_overlaps, generalized_iou, distance_iou,
                               complete_iou, efficient_iou, normalized_wasserstein_distance,
                               bbox_overlaps_obb)
-        import fastbbox
-        backend = getattr(fastbbox, '__backend__', 'unknown')
-        print(f"Backend: {backend}")
+        print(f"Backend: Nanobind")
     except ImportError as e:
         print(f"ERROR: Could not import fastbbox: {e}")
         return 1
