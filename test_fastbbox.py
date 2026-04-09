@@ -22,10 +22,17 @@ from typing import Callable, Dict, List, Tuple
 # Python Reference Implementations
 # =============================================================================
 
+def _xyxy_f64(a: np.ndarray) -> np.ndarray:
+    """Coerce (N, 4) XYXY boxes to C-contiguous float64 (matches bbox_nb.cpp)."""
+    return np.asarray(a, dtype=np.float64, order="C")
+
+
 def python_iou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of IoU."""
-    n, k = len(boxes), len(query_boxes)
-    result = np.zeros((n, k), dtype=np.float32)
+    boxes = _xyxy_f64(boxes)
+    query_boxes = _xyxy_f64(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
+    result = np.zeros((n, k), dtype=np.float64)
     
     for i in range(n):
         for j in range(k):
@@ -45,8 +52,10 @@ def python_iou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_giou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of Generalized IoU."""
-    n, k = len(boxes), len(query_boxes)
-    result = np.zeros((n, k), dtype=np.float32)
+    boxes = _xyxy_f64(boxes)
+    query_boxes = _xyxy_f64(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
+    result = np.zeros((n, k), dtype=np.float64)
     
     for i in range(n):
         for j in range(k):
@@ -75,8 +84,10 @@ def python_giou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_diou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of Distance IoU."""
-    n, k = len(boxes), len(query_boxes)
-    result = np.zeros((n, k), dtype=np.float32)
+    boxes = _xyxy_f64(boxes)
+    query_boxes = _xyxy_f64(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
+    result = np.zeros((n, k), dtype=np.float64)
     
     for i in range(n):
         for j in range(k):
@@ -111,8 +122,10 @@ def python_diou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_ciou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of Complete IoU."""
-    n, k = len(boxes), len(query_boxes)
-    result = np.zeros((n, k), dtype=np.float32)
+    boxes = _xyxy_f64(boxes)
+    query_boxes = _xyxy_f64(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
+    result = np.zeros((n, k), dtype=np.float64)
     
     for i in range(n):
         for j in range(k):
@@ -157,8 +170,10 @@ def python_ciou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_eiou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of Efficient IoU."""
-    n, k = len(boxes), len(query_boxes)
-    result = np.zeros((n, k), dtype=np.float32)
+    boxes = _xyxy_f64(boxes)
+    query_boxes = _xyxy_f64(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
+    result = np.zeros((n, k), dtype=np.float64)
     
     for i in range(n):
         for j in range(k):
@@ -199,8 +214,10 @@ def python_eiou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_nwd(boxes: np.ndarray, query_boxes: np.ndarray, tau: float = 1.0) -> np.ndarray:
     """Pure Python implementation of Normalized Wasserstein Distance."""
-    n, k = len(boxes), len(query_boxes)
-    result = np.zeros((n, k), dtype=np.float32)
+    boxes = _xyxy_f64(boxes)
+    query_boxes = _xyxy_f64(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
+    result = np.zeros((n, k), dtype=np.float64)
     
     for i in range(n):
         for j in range(k):
@@ -307,7 +324,7 @@ def generate_boxes(n: int, seed: int = 42) -> np.ndarray:
     y1 = np.random.uniform(0, 800, n)
     x2 = x1 + np.random.uniform(10, 200, n)
     y2 = y1 + np.random.uniform(10, 200, n)
-    return np.column_stack([x1, y1, x2, y2]).astype(np.float32)
+    return np.column_stack([x1, y1, x2, y2]).astype(np.float64)
 
 
 def generate_obb_boxes(n: int, seed: int = 42) -> np.ndarray:
@@ -340,7 +357,10 @@ class TestResult:
 def compare_results(python_result: np.ndarray, fast_result: np.ndarray, 
                     tolerance: float) -> Tuple[bool, float, float]:
     """Compare Python and fastbbox results."""
-    diff = np.abs(python_result - fast_result)
+    diff = np.abs(
+        np.asarray(python_result, dtype=np.float64)
+        - np.asarray(fast_result, dtype=np.float64)
+    )
     max_diff = np.max(diff)
     mean_diff = np.mean(diff)
     passed = max_diff < tolerance
@@ -354,7 +374,7 @@ def run_function_tests(name: str, python_func: Callable, fast_func: Callable,
     results = []
     
     # Test 1: Identical boxes
-    identical_boxes = np.array([[100, 100, 200, 200]], dtype=np.float32)
+    identical_boxes = np.array([[100, 100, 200, 200]], dtype=np.float64)
     py_result = python_func(identical_boxes, identical_boxes, *extra_args)
     fast_result = fast_func(identical_boxes, identical_boxes, *extra_args)
     passed, max_diff, mean_diff = compare_results(py_result, fast_result, tolerance)
@@ -362,8 +382,8 @@ def run_function_tests(name: str, python_func: Callable, fast_func: Callable,
                               py_result[0, 0], fast_result[0, 0]))
     
     # Test 2: Non-overlapping boxes
-    box1 = np.array([[0, 0, 10, 10]], dtype=np.float32)
-    box2 = np.array([[100, 100, 110, 110]], dtype=np.float32)
+    box1 = np.array([[0, 0, 10, 10]], dtype=np.float64)
+    box2 = np.array([[100, 100, 110, 110]], dtype=np.float64)
     py_result = python_func(box1, box2, *extra_args)
     fast_result = fast_func(box1, box2, *extra_args)
     passed, max_diff, mean_diff = compare_results(py_result, fast_result, tolerance)
@@ -371,8 +391,8 @@ def run_function_tests(name: str, python_func: Callable, fast_func: Callable,
                               py_result[0, 0], fast_result[0, 0]))
     
     # Test 3: Partial overlap
-    box1 = np.array([[0, 0, 10, 10]], dtype=np.float32)
-    box2 = np.array([[5, 5, 15, 15]], dtype=np.float32)
+    box1 = np.array([[0, 0, 10, 10]], dtype=np.float64)
+    box2 = np.array([[5, 5, 15, 15]], dtype=np.float64)
     py_result = python_func(box1, box2, *extra_args)
     fast_result = fast_func(box1, box2, *extra_args)
     passed, max_diff, mean_diff = compare_results(py_result, fast_result, tolerance)
@@ -387,8 +407,8 @@ def run_function_tests(name: str, python_func: Callable, fast_func: Callable,
                               passed, max_diff, mean_diff))
     
     # Test 5: Edge case - tiny boxes
-    tiny = np.array([[0, 0, 0.1, 0.1]], dtype=np.float32)
-    tiny2 = np.array([[0.05, 0.05, 0.15, 0.15]], dtype=np.float32)
+    tiny = np.array([[0, 0, 0.1, 0.1]], dtype=np.float64)
+    tiny2 = np.array([[0.05, 0.05, 0.15, 0.15]], dtype=np.float64)
     py_result = python_func(tiny, tiny2, *extra_args)
     fast_result = fast_func(tiny, tiny2, *extra_args)
     passed, max_diff, mean_diff = compare_results(py_result, fast_result, tolerance)
@@ -466,8 +486,8 @@ def main():
     parser.add_argument("--function", "-f", nargs="+", 
                         choices=["iou", "giou", "diou", "ciou", "eiou", "nwd", "obb"],
                         help="Test specific function(s)")
-    parser.add_argument("--tolerance", "-t", type=float, default=1e-5,
-                        help="Tolerance threshold for comparisons (default: 1e-5)")
+    parser.add_argument("--tolerance", "-t", type=float, default=1e-9,
+                        help="Tolerance threshold for XYXY metrics (float64; default: 1e-9)")
     parser.add_argument("--obb-tolerance", type=float, default=1e-9,
                         help="Tolerance for OBB tests; reference uses float64 matching C++ (default: 1e-9)")
     parser.add_argument("--size", "-s", type=int, default=1000,
