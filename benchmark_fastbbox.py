@@ -21,20 +21,20 @@ import time
 from typing import Callable, Dict, List, Tuple
 
 # =============================================================================
-# Python Reference Implementations (for benchmark comparison; float64 / C++ aligned)
+# Python Reference Implementations (for benchmark comparison; float32 / C++ aligned)
 # =============================================================================
 
-def _xyxy_f64(a: np.ndarray) -> np.ndarray:
-    """Coerce (N, 4) XYXY boxes to C-contiguous float64 (matches bbox_nb.cpp)."""
-    return np.asarray(a, dtype=np.float64, order="C")
+def _xyxy_f32(a: np.ndarray) -> np.ndarray:
+    """Coerce (N, 4) XYXY boxes to C-contiguous float32 (matches bbox_nb.cpp)."""
+    return np.asarray(a, dtype=np.float32, order="C")
 
 
 def python_iou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of IoU."""
-    boxes = _xyxy_f64(boxes)
-    query_boxes = _xyxy_f64(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
     n, k = boxes.shape[0], query_boxes.shape[0]
-    result = np.zeros((n, k), dtype=np.float64)
+    result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
             x1 = max(boxes[i, 0], query_boxes[j, 0])
@@ -51,10 +51,10 @@ def python_iou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_giou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of GIoU."""
-    boxes = _xyxy_f64(boxes)
-    query_boxes = _xyxy_f64(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
     n, k = boxes.shape[0], query_boxes.shape[0]
-    result = np.zeros((n, k), dtype=np.float64)
+    result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
             x1 = max(boxes[i, 0], query_boxes[j, 0])
@@ -78,10 +78,10 @@ def python_giou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_diou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of DIoU."""
-    boxes = _xyxy_f64(boxes)
-    query_boxes = _xyxy_f64(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
     n, k = boxes.shape[0], query_boxes.shape[0]
-    result = np.zeros((n, k), dtype=np.float64)
+    result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
             x1 = max(boxes[i, 0], query_boxes[j, 0])
@@ -110,10 +110,10 @@ def python_diou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_ciou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of CIoU."""
-    boxes = _xyxy_f64(boxes)
-    query_boxes = _xyxy_f64(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
     n, k = boxes.shape[0], query_boxes.shape[0]
-    result = np.zeros((n, k), dtype=np.float64)
+    result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
             x1 = max(boxes[i, 0], query_boxes[j, 0])
@@ -150,10 +150,10 @@ def python_ciou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_eiou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of EIoU."""
-    boxes = _xyxy_f64(boxes)
-    query_boxes = _xyxy_f64(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
     n, k = boxes.shape[0], query_boxes.shape[0]
-    result = np.zeros((n, k), dtype=np.float64)
+    result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
             x1 = max(boxes[i, 0], query_boxes[j, 0])
@@ -187,10 +187,10 @@ def python_eiou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_nwd(boxes: np.ndarray, query_boxes: np.ndarray, tau: float = 1.0) -> np.ndarray:
     """Pure Python implementation of NWD."""
-    boxes = _xyxy_f64(boxes)
-    query_boxes = _xyxy_f64(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
     n, k = boxes.shape[0], query_boxes.shape[0]
-    result = np.zeros((n, k), dtype=np.float64)
+    result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
             box_cx = (boxes[i, 0] + boxes[i, 2]) / 2.0
@@ -210,10 +210,10 @@ def python_nwd(boxes: np.ndarray, query_boxes: np.ndarray, tau: float = 1.0) -> 
 
 def python_obb_iou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of OBB IoU (matches obb_bbox_nb.cpp numerics)."""
-    boxes = np.asarray(boxes, dtype=np.float64, order="C")
-    query_boxes = np.asarray(query_boxes, dtype=np.float64, order="C")
+    boxes = np.asarray(boxes, dtype=np.float32, order="C")
+    query_boxes = np.asarray(query_boxes, dtype=np.float32, order="C")
     n, k = boxes.shape[0], query_boxes.shape[0]
-    result = np.zeros((n, k), dtype=np.float64)
+    result = np.zeros((n, k), dtype=np.float32)
     eps_aa = 1e-6
 
     def obb_to_corners(cx, cy, width, height, angle):
@@ -221,8 +221,8 @@ def python_obb_iou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
         sin_a = np.sin(angle)
         hw = width * 0.5
         hh = height * 0.5
-        local_x = np.array([-hw, hw, hw, -hw], dtype=np.float64)
-        local_y = np.array([-hh, -hh, hh, hh], dtype=np.float64)
+        local_x = np.array([-hw, hw, hw, -hw], dtype=np.float32)
+        local_y = np.array([-hh, -hh, hh, hh], dtype=np.float32)
         corners_x = cx + local_x * cos_a - local_y * sin_a
         corners_y = cy + local_x * sin_a + local_y * cos_a
         return corners_x, corners_y
@@ -292,7 +292,7 @@ def generate_boxes(n: int, seed: int = 42) -> np.ndarray:
     y1 = np.random.uniform(0, 800, n)
     x2 = x1 + np.random.uniform(10, 200, n)
     y2 = y1 + np.random.uniform(10, 200, n)
-    return np.column_stack([x1, y1, x2, y2]).astype(np.float64)
+    return np.column_stack([x1, y1, x2, y2]).astype(np.float32)
 
 
 def generate_obb_boxes(n: int, seed: int = 42) -> np.ndarray:
@@ -303,7 +303,7 @@ def generate_obb_boxes(n: int, seed: int = 42) -> np.ndarray:
     w = np.random.uniform(10, 200, n)
     h = np.random.uniform(10, 200, n)
     angle = np.random.uniform(0, 2 * np.pi, n)
-    return np.column_stack([cx, cy, w, h, angle]).astype(np.float64)
+    return np.column_stack([cx, cy, w, h, angle]).astype(np.float32)
 
 
 # =============================================================================
@@ -415,7 +415,7 @@ def main():
         print(f"ERROR: Could not import fastbbox: {e}")
         return 1
     
-    print(f"Test size: {args.size} x {args.size} boxes = {args.size * args.size:,} comparisons (float64)")
+    print(f"Test size: {args.size} x {args.size} boxes = {args.size * args.size:,} comparisons (float32)")
     print(f"Runs: {args.runs}")
     print("=" * 60)
     
