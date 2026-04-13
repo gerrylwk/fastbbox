@@ -6,15 +6,15 @@ Fast IoU/overlap computations for axis-aligned and oriented bounding boxes, powe
 ```
 Function Python (ms)    FastBBox (ms)  Speedup
 --------------------------------------------------
-IoU           2037.59          4.29     474.9x
-GIoU          3712.32          7.98     465.2x
-DIoU          6751.35          8.97     752.3x
-CIoU         12025.54         36.65     328.1x
-EIoU          8753.35         10.56     829.3x
-NWD           4386.10         21.59     203.1x
-OBB          55237.81         60.39     914.7x
+IoU           1956.54          4.04     484.8x
+GIoU          3027.89          6.38     474.6x
+DIoU          4227.29          6.26     675.2x
+CIoU          6494.69         17.86     363.7x
+EIoU          5285.72          6.90     765.7x
+NWD           2472.18         11.21     220.5x
+OBB          21883.02         30.29     722.5x
 --------------------------------------------------
-TOTAL        92904.06        150.43     617.6x
+TOTAL        45347.33         82.93     546.8x
 ```
 
 ## Installation
