@@ -21,12 +21,19 @@ import time
 from typing import Callable, Dict, List, Tuple
 
 # =============================================================================
-# Python Reference Implementations (for benchmark comparison)
+# Python Reference Implementations (for benchmark comparison; float32 / C++ aligned)
 # =============================================================================
+
+def _xyxy_f32(a: np.ndarray) -> np.ndarray:
+    """Coerce (N, 4) XYXY boxes to C-contiguous float32 (matches bbox_nb.cpp)."""
+    return np.asarray(a, dtype=np.float32, order="C")
+
 
 def python_iou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of IoU."""
-    n, k = len(boxes), len(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
     result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
@@ -44,7 +51,9 @@ def python_iou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_giou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of GIoU."""
-    n, k = len(boxes), len(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
     result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
@@ -69,7 +78,9 @@ def python_giou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_diou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of DIoU."""
-    n, k = len(boxes), len(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
     result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
@@ -99,7 +110,9 @@ def python_diou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_ciou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of CIoU."""
-    n, k = len(boxes), len(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
     result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
@@ -137,7 +150,9 @@ def python_ciou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_eiou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
     """Pure Python implementation of EIoU."""
-    n, k = len(boxes), len(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
     result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
@@ -172,7 +187,9 @@ def python_eiou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
 
 def python_nwd(boxes: np.ndarray, query_boxes: np.ndarray, tau: float = 1.0) -> np.ndarray:
     """Pure Python implementation of NWD."""
-    n, k = len(boxes), len(query_boxes)
+    boxes = _xyxy_f32(boxes)
+    query_boxes = _xyxy_f32(query_boxes)
+    n, k = boxes.shape[0], query_boxes.shape[0]
     result = np.zeros((n, k), dtype=np.float32)
     for i in range(n):
         for j in range(k):
@@ -192,46 +209,75 @@ def python_nwd(boxes: np.ndarray, query_boxes: np.ndarray, tau: float = 1.0) -> 
 
 
 def python_obb_iou(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
-    """Pure Python implementation of OBB IoU."""
-    n, k = len(boxes), len(query_boxes)
+    """Pure Python implementation of OBB IoU (matches obb_bbox_nb.cpp numerics)."""
+    boxes = np.asarray(boxes, dtype=np.float32, order="C")
+    query_boxes = np.asarray(query_boxes, dtype=np.float32, order="C")
+    n, k = boxes.shape[0], query_boxes.shape[0]
     result = np.zeros((n, k), dtype=np.float32)
-    
+    eps_aa = 1e-6
+
     def obb_to_corners(cx, cy, width, height, angle):
-        cos_a, sin_a = np.cos(angle), np.sin(angle)
-        hw, hh = width * 0.5, height * 0.5
-        local_x = np.array([-hw, hw, hw, -hw])
-        local_y = np.array([-hh, -hh, hh, hh])
+        cos_a = np.cos(angle)
+        sin_a = np.sin(angle)
+        hw = width * 0.5
+        hh = height * 0.5
+        local_x = np.array([-hw, hw, hw, -hw], dtype=np.float32)
+        local_y = np.array([-hh, -hh, hh, hh], dtype=np.float32)
         corners_x = cx + local_x * cos_a - local_y * sin_a
         corners_y = cy + local_x * sin_a + local_y * cos_a
         return corners_x, corners_y
-    
+
     for i in range(n):
         for j in range(k):
             cx1, cy1, w1, h1, angle1 = boxes[i]
             cx2, cy2, w2, h2, angle2 = query_boxes[j]
-            if abs(angle1) < 1e-6 and abs(angle2) < 1e-6:
-                x1_min, x1_max = cx1 - w1 * 0.5, cx1 + w1 * 0.5
-                y1_min, y1_max = cy1 - h1 * 0.5, cy1 + h1 * 0.5
-                x2_min, x2_max = cx2 - w2 * 0.5, cx2 + w2 * 0.5
-                y2_min, y2_max = cy2 - h2 * 0.5, cy2 + h2 * 0.5
-                inter_x = max(0, min(x1_max, x2_max) - max(x1_min, x2_min))
-                inter_y = max(0, min(y1_max, y2_max) - max(y1_min, y2_min))
-                intersection = inter_x * inter_y
+
+            if abs(angle1) < eps_aa and abs(angle2) < eps_aa:
+                x1_min = cx1 - w1 * 0.5
+                x1_max = cx1 + w1 * 0.5
+                y1_min = cy1 - h1 * 0.5
+                y1_max = cy1 + h1 * 0.5
+                x2_min = cx2 - w2 * 0.5
+                x2_max = cx2 + w2 * 0.5
+                y2_min = cy2 - h2 * 0.5
+                y2_max = cy2 + h2 * 0.5
+                inter_x_min = max(x1_min, x2_min)
+                inter_x_max = min(x1_max, x2_max)
+                inter_y_min = max(y1_min, y2_min)
+                inter_y_max = min(y1_max, y2_max)
+                if inter_x_min >= inter_x_max or inter_y_min >= inter_y_max:
+                    intersection = 0.0
+                else:
+                    intersection = (inter_x_max - inter_x_min) * (inter_y_max - inter_y_min)
             else:
                 corners1_x, corners1_y = obb_to_corners(cx1, cy1, w1, h1, angle1)
                 corners2_x, corners2_y = obb_to_corners(cx2, cy2, w2, h2, angle2)
-                min_x1, max_x1 = np.min(corners1_x), np.max(corners1_x)
-                min_y1, max_y1 = np.min(corners1_y), np.max(corners1_y)
-                min_x2, max_x2 = np.min(corners2_x), np.max(corners2_x)
-                min_y2, max_y2 = np.min(corners2_y), np.max(corners2_y)
-                inter_x = max(0, min(max_x1, max_x2) - max(min_x1, min_x2))
-                inter_y = max(0, min(max_y1, max_y2) - max(min_y1, min_y2))
-                aabb_intersection = inter_x * inter_y
-                angle_factor = max(0.5, np.cos(abs(angle1)) * np.cos(abs(angle2)))
-                intersection = aabb_intersection * angle_factor
-            area1, area2 = w1 * h1, w2 * h2
+                min_x1 = float(np.min(corners1_x))
+                max_x1 = float(np.max(corners1_x))
+                min_y1 = float(np.min(corners1_y))
+                max_y1 = float(np.max(corners1_y))
+                min_x2 = float(np.min(corners2_x))
+                max_x2 = float(np.max(corners2_x))
+                min_y2 = float(np.min(corners2_y))
+                max_y2 = float(np.max(corners2_y))
+                inter_x_min = max(min_x1, min_x2)
+                inter_x_max = min(max_x1, max_x2)
+                inter_y_min = max(min_y1, min_y2)
+                inter_y_max = min(max_y1, max_y2)
+                if inter_x_min >= inter_x_max or inter_y_min >= inter_y_max:
+                    intersection = 0.0
+                else:
+                    aabb_intersection = (inter_x_max - inter_x_min) * (inter_y_max - inter_y_min)
+                    angle_factor = max(
+                        0.5, float(np.cos(abs(angle1)) * np.cos(abs(angle2)))
+                    )
+                    intersection = aabb_intersection * angle_factor
+
+            area1 = float(w1 * h1)
+            area2 = float(w2 * h2)
             union = area1 + area2 - intersection
             result[i, j] = intersection / union if union > 0 else 0.0
+
     return result
 
 
@@ -369,7 +415,7 @@ def main():
         print(f"ERROR: Could not import fastbbox: {e}")
         return 1
     
-    print(f"Test size: {args.size} x {args.size} boxes = {args.size * args.size:,} comparisons")
+    print(f"Test size: {args.size} x {args.size} boxes = {args.size * args.size:,} comparisons (float32)")
     print(f"Runs: {args.runs}")
     print("=" * 60)
     
