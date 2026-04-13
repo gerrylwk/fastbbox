@@ -12,9 +12,7 @@
 
 namespace nb = nanobind;
 
-using FloatArray2D = nb::ndarray<float, nb::shape<-1, -1>, nb::c_contig, nb::device::cpu>;
 using FloatArray2DIn = nb::ndarray<const float, nb::shape<-1, 4>, nb::c_contig, nb::device::cpu>;
-using FloatArray2DIn5 = nb::ndarray<const float, nb::shape<-1, 5>, nb::c_contig, nb::device::cpu>;
 
 /**
  * Compute IoU overlaps between two sets of boxes.
@@ -234,7 +232,7 @@ nb::ndarray<nb::numpy, float, nb::shape<-1, -1>> complete_iou(
     const float* boxes_ptr = boxes.data();
     const float* query_ptr = query_boxes.data();
     
-    const float pi = 3.14159265359f;
+    constexpr float pi = 3.14159265359f;
     
     for (size_t k = 0; k < K; ++k) {
         float query_area = (query_ptr[k * 4 + 2] - query_ptr[k * 4 + 0]) *
